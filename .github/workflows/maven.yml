@@ -53,9 +53,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script_stop: true
-          script: |
-            cd ./startup
-            pwd
-            chmod +x gatewayStartup.sh
-            pwd
-            ./gatewayStartup.sh
+          script: "startup/frontStartup.sh"
