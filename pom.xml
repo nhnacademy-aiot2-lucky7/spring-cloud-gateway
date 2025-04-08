@@ -10,7 +10,8 @@
     </parent>
     <groupId>com.nhnacademy</groupId>
     <artifactId>gateway</artifactId>
-    <version>${build.timestamp}</version>
+    <version>0.0.1-SNAPSHOT</version>
+    <!--<version>${build.timestamp}</version>-->
     <name>spring-cloud-gateway</name>
     <description>spring-cloud-gateway</description>
     <url/>
