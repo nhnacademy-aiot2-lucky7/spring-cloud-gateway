@@ -1,5 +1,6 @@
 package com.nhnacademy.gateway.common.util;
 
+import com.nhnacademy.gateway.common.exception.UnauthorizedException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -8,26 +9,27 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Objects;
 
 /**
  * JWT 토큰의 유효성 검증 및 클레임 정보 추출을 담당하는 유틸리티 클래스입니다.
- * <p>
+ * 다음과 같은 기능을 제공합니다:
  * - 토큰의 유효성 검사
  * - 사용자 ID(subject) 추출
- * - 커스텀 클레임 추출 기능을 제공합니다.
+ * - 커스텀 클레임 추출
  */
 @Slf4j
 @Component
 public class JwtUtil {
 
     /**
-     * application.properties 또는 환경변수에서 주입받은 JWT 서명용 비밀 키 문자열.
+     * application.properties 또는 환경변수에서 주입받는 JWT 서명용 비밀 키 문자열
      */
     @Value("${jwt.secret}")
     private String secret;
 
     /**
-     * JWT 서명 검증에 사용되는 Key 객체.
+     * JWT 서명 검증에 사용되는 Key 객체
      */
     private Key secretKey;
 
@@ -40,7 +42,7 @@ public class JwtUtil {
     }
 
     /**
-     * 주어진 JWT 토큰의 서명 및 구조 유효성을 검증합니다.
+     * 주어진 JWT 토큰의 서명과 구조의 유효성을 검증합니다.
      *
      * @param token 검증할 JWT 토큰 문자열
      * @return 유효한 토큰이면 true, 그렇지 않으면 false
@@ -57,21 +59,21 @@ public class JwtUtil {
             return true;
         } catch (ExpiredJwtException e) {
             log.info("JWT 토큰이 만료되었습니다: {}", e.getMessage());
-            return false;
         } catch (UnsupportedJwtException | MalformedJwtException e) {
             log.warn("지원하지 않거나 변조된 JWT 토큰입니다: {}", e.getMessage());
-            return false;
         } catch (IllegalArgumentException e) {
             log.debug("JWT 토큰이 비어있거나 유효하지 않습니다.");
-            return false;
         }
+
+        return false;
     }
 
     /**
      * JWT 토큰에서 사용자 ID(subject)를 추출합니다.
      *
      * @param token JWT 토큰 문자열
-     * @return 사용자 ID (subject), 추출 실패 시 null
+     * @return 사용자 ID(subject)
+     * @throws UnauthorizedException 토큰이 유효하지 않거나 파싱에 실패한 경우
      */
     public String getUserId(String token) {
         try {
@@ -79,8 +81,11 @@ public class JwtUtil {
 
             return getClaims(token).getSubject();
         } catch (JwtException | IllegalArgumentException e) {
-            log.warn("JWT에서 사용자 ID 추출에 실패했습니다: {}", e.getMessage());
-            return null;
+            String message = e.getMessage();
+            throw new UnauthorizedException(
+                    (Objects.nonNull(message) && !message.isEmpty())
+                            ? message : "JWT에서 사용자 ID 추출에 실패"
+            );
         }
     }
 
@@ -89,17 +94,26 @@ public class JwtUtil {
      *
      * @param token     JWT 토큰 문자열
      * @param claimName 추출할 클레임 이름 (예: "role", "email", "nickname")
-     * @return 클레임 값, 추출 실패 시 null
+     * @return 해당 클레임 값
+     * @throws UnauthorizedException 클레임 추출에 실패한 경우
      */
     public String getClaimValue(String token, String claimName) {
         try {
             isValidString(token, "JWT 토큰");
             isValidString(claimName, "클레임 이름");
 
-            return (String) getClaims(token).get(claimName);
+             String claimValue = (String) getClaims(token).get(claimName);
+             if(Objects.isNull(claimValue)) {
+                 throw new JwtException("claimValue is null");
+             }
+
+            return claimValue;
         } catch (JwtException | IllegalArgumentException e) {
-            log.warn("JWT에서 '{}' 클레임 추출에 실패했습니다: {}", claimName, e.getMessage());
-            return null;
+            String message = e.getMessage();
+            throw new UnauthorizedException(
+                    (Objects.nonNull(message) && !message.isEmpty())
+                            ? message : "JWT에서 클레임 값 추출에 실패"
+            );
         }
     }
 
@@ -120,18 +134,15 @@ public class JwtUtil {
     }
 
     /**
-     * 입력 문자열이 null이거나 비어있는지 확인하고, 유효하지 않으면 예외를 발생시킵니다.
+     * 입력 문자열이 null이거나 비어있는 경우 예외를 발생시킵니다.
      *
      * @param value     검사할 문자열
-     * @param fieldName 예외 메시지 및 로그 출력을 위한 필드 이름
-     * @throws IllegalArgumentException value가 null 또는 빈 문자열인 경우
+     * @param fieldName 예외 메시지에 사용될 필드 이름
+     * @throws IllegalArgumentException 유효하지 않은 문자열일 경우
      */
     private void isValidString(String value, String fieldName) {
         if (value == null || value.trim().isEmpty()) {
-            String message = fieldName + "이(가) null이거나 비어 있습니다.";
-            log.warn(message);
-
-            throw new IllegalArgumentException(message);
+            throw new IllegalArgumentException("%s이(가) null이거나 비어 있습니다.".formatted(fieldName));
         }
     }
 }
