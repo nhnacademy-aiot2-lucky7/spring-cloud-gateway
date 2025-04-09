@@ -1,7 +1,12 @@
 package com.nhnacademy.gateway.common.util;
 
 import com.nhnacademy.gateway.common.exception.UnauthorizedException;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -102,10 +107,10 @@ public class JwtUtil {
             isValidString(token, "JWT 토큰");
             isValidString(claimName, "클레임 이름");
 
-             String claimValue = (String) getClaims(token).get(claimName);
-             if(Objects.isNull(claimValue)) {
-                 throw new JwtException("claimValue is null");
-             }
+            String claimValue = (String) getClaims(token).get(claimName);
+            if (Objects.isNull(claimValue)) {
+                throw new JwtException("claimValue is null");
+            }
 
             return claimValue;
         } catch (JwtException | IllegalArgumentException e) {
@@ -122,7 +127,7 @@ public class JwtUtil {
      *
      * @param token JWT 토큰 문자열
      * @return Claims 객체
-     * @throws JwtException            파싱 실패 또는 서명 검증 실패 시
+     * @throws JwtException             파싱 실패 또는 서명 검증 실패 시
      * @throws IllegalArgumentException 토큰이 null이거나 잘못된 경우
      */
     private Claims getClaims(String token) throws JwtException, IllegalArgumentException {
