@@ -54,3 +54,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script_stop: true
           script: startup/gatewayStartup.sh
+          envs: JWT_SECRET
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}

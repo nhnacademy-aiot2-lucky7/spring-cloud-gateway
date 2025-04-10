@@ -10,7 +10,7 @@
 - 클레임(Claims) 추출  
 
 이 유틸은 `JwtAuthorizationFilter`에서 사용되며, 필터는 토큰의 유효성을 확인한 후 클레임에서 `userId`를 추출합니다.  
-추출된 `userId`는 AES 방식으로 암호화되며, 커스텀 헤더인 `X-User-Id`에 담겨 하위 API 서버로 전달됩니다.
+추출된 `userId`는 이미 AES 방식으로 암호화되어있으며, 커스텀 헤더인 `X-User-Id`에 담겨 하위 API 서버로 전달됩니다.
 
 ---
 
@@ -46,12 +46,5 @@ Status: 401 Unauthorized 또는 500 Internal Server Error
 {
   "status": 401,
   "message": "JWT에서 사용자 ID 추출에 실패"
-}
-```
-
-```json
-{
-  "status": 401,
-  "message": "JWT에서 클레임 값 추출에 실패"
 }
 ```
