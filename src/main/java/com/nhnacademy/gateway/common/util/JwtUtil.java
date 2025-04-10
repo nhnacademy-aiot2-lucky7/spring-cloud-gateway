@@ -39,6 +39,8 @@ public class JwtUtil {
     @PostConstruct
     public void init() {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+        log.info(" Starting gateway application...");
+        log.info(" Received JWT_SECRET: " + secret);
     }
 
     /**
