@@ -4,7 +4,6 @@ import com.nhnacademy.gateway.common.filter.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
-import org.springframework.cloud.gateway.support.RouteMetadataUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,23 +17,13 @@ public class RouterConfig {
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route(
-                        "your-spring-application-name",
+                        "spring-web-api",
                         r -> r
-                                .header("X-USER-ID", "your-web-spring-application")
-                                /*.and().cookie("access_token")*/
-                                .and().path("/admin/**")
-                                .filters(
-                                        f ->
-                                                f.filter(
-                                                        jwtAuthorizationFilter,
-                                                        jwtAuthorizationFilter.getOrder()
-                                                )/*.filter(
-                                                        // 추가로 검증할 Filter를 추가해주세요.
-                                                )*/
-                                )
-                                .metadata(RouteMetadataUtils.CONNECT_TIMEOUT_ATTR, 1000)
-                                .metadata(RouteMetadataUtils.RESPONSE_TIMEOUT_ATTR, 3000)
-                                .uri("lb://your-spring-application-name")
+                                .path("/admin/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://SPRING-WEB-API")
+                                // 실패했을 경우, 로그인 페이지로 유도하는 리디렉션 이벤트를 추가 예정
+
                 )
                 .build();
     }
