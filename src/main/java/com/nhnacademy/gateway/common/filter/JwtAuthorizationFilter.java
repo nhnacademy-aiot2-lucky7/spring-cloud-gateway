@@ -16,14 +16,25 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * <h2>Info</h2>
- * JWT 토큰 내에 존재하는 클레임 정보를 추출하여 전달하는 게이트웨이 필터 클래스입니다.
- * <hr>
- * - <b>1. 토큰이 존재하는 경우</b> <br>
- * 토큰 내에 존재하는 {@code userId}와 {@code userRole} 클레임 정보를 추출하여 전달합니다.
- * <hr>
- * - <b>2. 토큰이 존재하지 않는 경우</b> <br>
- * {@code userId}와 {@code userRole}에, 기본 값({@code guest})을 할당합니다.
+ * JWT 인증 필터.
+ *
+ * <p>Spring Cloud Gateway의 커스텀 필터로, 요청 쿠키에서 JWT를 추출해 유효성을 검증하고,
+ * 유효한 경우 사용자 ID를 {@code X-User-Id} 헤더에 추가하여 다음 서비스로 전달합니다.</p>
+ *
+ * <h3>동작 방식</h3>
+ * <ul>
+ *     <li>access_token 쿠키가 존재하고, 토큰이 유효한 경우:
+ *         <ul>
+ *             <li>토큰에서 userId 클레임 추출</li>
+ *             <li>추출한 userId를 {@code X-User-Id} 헤더에 추가</li>
+ *         </ul>
+ *     </li>
+ *     <li>토큰이 없거나 유효하지 않은 경우:
+ *         <ul>
+ *             <li>요청을 수정하지 않고 그대로 다음 필터로 전달</li>
+ *         </ul>
+ *     </li>
+ * </ul>
  *
  * @author Rayhke
  */
@@ -31,38 +42,35 @@ import java.util.Objects;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter implements GatewayFilter {
-    enum USER_ROLE {
-        USER,
-        ADMIN,
-        GUEST
-    }
 
-    private static final String CLAIM_USER_NAME = "userId";
-    private static final String CLAIM_USER_ROLE = "userRole";
+    /** JWT 유틸리티 (토큰 검증 및 클레임 추출) */
     private final JwtUtil jwtUtil;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        // access_token 쿠키 조회
         List<HttpCookie> cookies = exchange.getRequest().getCookies().get("access_token");
-        String userId = USER_ROLE.GUEST.name();
-        String userRole = USER_ROLE.GUEST.name();
 
+        // 쿠키가 존재하고 비어있지 않다면
         if (Objects.nonNull(cookies) && !cookies.isEmpty()) {
             String token = cookies.getFirst().getValue();
+
+            // 토큰이 유효하면
             if (jwtUtil.isValidToken(token)) {
-                userId = jwtUtil.getClaimValue(token, CLAIM_USER_NAME);
-                userRole = jwtUtil.getClaimValue(token, CLAIM_USER_ROLE);
+                // userId 클레임 추출
+                String userId = jwtUtil.getUserId(token);
+
+                // 커스텀 헤더에 userId 담아서 요청 객체 수정
+                ServerWebExchange mutatedExchange = exchange.mutate()
+                        .request(builder -> builder.header("X-User-Id", userId))
+                        .build();
+
+                // 수정된 요청 전달
+                return chain.filter(mutatedExchange);
             }
         }
 
-        if (!USER_ROLE.ADMIN.name().equals(userRole)) {
-            throw new ForbiddenException("관리자 권한이 필요합니다.");
-        }
-
-        Map<String, Object> attribute = exchange.getAttributes();
-        attribute.put(CLAIM_USER_NAME, userId);
-        attribute.put(CLAIM_USER_ROLE, userRole);
-
+        // 토큰이 없거나 유효하지 않으면 원본 요청 그대로 전달
         return chain.filter(exchange);
     }
 }

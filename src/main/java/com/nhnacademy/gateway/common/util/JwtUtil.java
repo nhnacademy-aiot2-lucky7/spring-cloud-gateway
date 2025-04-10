@@ -12,20 +12,18 @@ import java.security.Key;
 import java.util.Objects;
 
 /**
- * <h2>JwtUtil</h2>
- * <p>
- * JWT 토큰의 유효성 검증 및 사용자 정보 추출을 담당하는 유틸리티 클래스입니다.
- * </p>
+ * JWT 유틸리티 클래스.
+ *
+ * <p>토큰 생성, 서명 검증, 클레임 추출 등 JWT 관련 기능을 제공합니다.</p>
  *
  * <h3>주요 기능</h3>
  * <ul>
- *     <li>JWT 서명 검증 및 구조 유효성 검사</li>
- *     <li>사용자 ID(subject) 추출</li>
- *     <li>커스텀 클레임 값 추출</li>
+ *     <li>토큰 서명 및 만료 검증</li>
+ *     <li>서브젝트(userId) 및 커스텀 클레임 추출</li>
  * </ul>
  *
  * <p>
- * JWT 관련 예외가 발생한 경우 {@link UnauthorizedException}을 통해 처리합니다.
+ * 유효하지 않은 토큰인 경우 {@link UnauthorizedException}을 발생시킵니다.
  * </p>
  *
  * @author HwangSlater
@@ -34,19 +32,15 @@ import java.util.Objects;
 @Component
 public class JwtUtil {
 
-    /**
-     * application.properties 또는 환경변수에서 주입받는 JWT 서명용 비밀 키 문자열
-     */
+    /** application.properties에서 주입받는 JWT 서명용 시크릿 키 */
     @Value("${jwt.secret}")
     private String secret;
 
-    /**
-     * JWT 서명 검증에 사용되는 Key 객체
-     */
+    /** JWT 서명 및 검증에 사용하는 HMAC 키 객체 */
     private Key secretKey;
 
     /**
-     * 빈 초기화 시 실행되며, 비밀 키 문자열을 기반으로 HMAC 서명 키를 생성합니다.
+     * 빈 초기화 시 시크릿 문자열을 기반으로 서명 키를 생성합니다.
      */
     @PostConstruct
     public void init() {
@@ -54,14 +48,14 @@ public class JwtUtil {
     }
 
     /**
-     * 주어진 JWT 토큰의 서명, 구조, 만료 여부를 검증합니다.
+     * 주어진 JWT 토큰이 유효한지 검증합니다.
      *
-     * @param token 검증할 JWT 토큰 문자열
-     * @return 유효한 토큰이면 true, 그렇지 않으면 false
+     * @param token 검증할 JWT 문자열
+     * @return 유효한 경우 true, 그렇지 않으면 false
      */
     public boolean isValidToken(String token) {
         try {
-            isValidString(token, "JWT 토큰");
+            isValidJwtToken(token);
 
             Jwts.parserBuilder()
                     .setSigningKey(secretKey)
@@ -70,74 +64,45 @@ public class JwtUtil {
 
             return true;
         } catch (ExpiredJwtException e) {
-            log.info("JWT 토큰이 만료되었습니다: {}", e.getMessage());
+            log.info("JWT 만료됨: {}", e.getMessage());
         } catch (UnsupportedJwtException | MalformedJwtException e) {
-            log.warn("지원하지 않거나 변조된 JWT 토큰입니다: {}", e.getMessage());
+            log.warn("지원하지 않거나 변조된 JWT: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            log.debug("JWT 토큰이 비어있거나 유효하지 않습니다.");
+            log.debug("JWT 토큰 비어 있음 또는 잘못된 형식.");
         }
 
         return false;
     }
 
     /**
-     * JWT 토큰에서 사용자 ID(subject)를 추출합니다.
+     * JWT에서 사용자 ID(subject)를 추출합니다.
      *
-     * @param token JWT 토큰 문자열
-     * @return 사용자 ID(subject)
-     * @throws UnauthorizedException 토큰이 유효하지 않거나 파싱에 실패한 경우
+     * @param token JWT 문자열
+     * @return subject 값 (예: userId)
+     * @throws UnauthorizedException 토큰이 유효하지 않을 경우
      */
     public String getUserId(String token) {
         try {
-            isValidString(token, "JWT 토큰");
-
+            isValidJwtToken(token);
             return getClaims(token).getSubject();
         } catch (JwtException | IllegalArgumentException e) {
             String message = e.getMessage();
             throw new UnauthorizedException(
                     (Objects.nonNull(message) && !message.isEmpty())
-                            ? message : "JWT에서 사용자 ID 추출에 실패"
+                            ? message
+                            : "JWT에서 사용자 ID 추출 실패"
             );
         }
     }
 
     /**
-     * JWT 토큰에서 특정 클레임 값을 문자열로 추출합니다.
+     * JWT에서 Claims(페이로드) 객체를 추출합니다.
      *
-     * @param token     JWT 토큰 문자열
-     * @param claimName 추출할 클레임 이름 (예: "role", "email", "nickname")
-     * @return 해당 클레임의 값
-     * @throws UnauthorizedException 클레임 추출에 실패한 경우
-     */
-    public String getClaimValue(String token, String claimName) {
-        try {
-            isValidString(token, "JWT 토큰");
-            isValidString(claimName, "클레임 이름");
-
-            String claimValue = (String) getClaims(token).get(claimName);
-            if (Objects.isNull(claimValue)) {
-                throw new JwtException("claimValue is null");
-            }
-
-            return claimValue;
-        } catch (JwtException | IllegalArgumentException e) {
-            String message = e.getMessage();
-            throw new UnauthorizedException(
-                    (Objects.nonNull(message) && !message.isEmpty())
-                            ? message : "JWT에서 클레임 값 추출에 실패"
-            );
-        }
-    }
-
-    /**
-     * JWT 토큰에서 Claims(페이로드) 정보를 추출합니다.
-     *
-     * @param token JWT 토큰 문자열
+     * @param token JWT 문자열
      * @return Claims 객체
-     * @throws JwtException             파싱 실패 또는 서명 검증 실패 시
-     * @throws IllegalArgumentException 토큰이 null이거나 잘못된 경우
+     * @throws JwtException 서명 또는 구조 검증 실패 시
      */
-    private Claims getClaims(String token) throws JwtException, IllegalArgumentException {
+    private Claims getClaims(String token) throws JwtException {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
@@ -146,15 +111,14 @@ public class JwtUtil {
     }
 
     /**
-     * 입력 문자열이 null이거나 비어있는 경우 예외를 발생시킵니다.
+     * 주어진 문자열이 null이거나 비어 있는 경우 예외를 발생시킵니다.
      *
-     * @param value     검사할 문자열
-     * @param fieldName 예외 메시지에 사용될 필드 이름
-     * @throws IllegalArgumentException 유효하지 않은 문자열일 경우
+     * @param value 검사할 문자열
+     * @throws IllegalArgumentException 유효하지 않은 경우
      */
-    private void isValidString(String value, String fieldName) {
+    private void isValidJwtToken(String value) {
         if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException("%s이(가) null이거나 비어 있습니다.".formatted(fieldName));
+            throw new IllegalArgumentException("JWT 토큰이 null이거나 비어 있음.");
         }
     }
 }

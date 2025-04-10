@@ -85,29 +85,4 @@ class JwtUtilTest {
     void getUserId_exception2() {
         assertThrows(UnauthorizedException.class, () -> jwtUtil.getUserId(null));
     }
-
-    @Test
-    @DisplayName("클레임 추출")
-    void getClaimValue() {
-        String role = jwtUtil.getClaimValue(token, "role");
-        assertEquals(testRole, role);
-    }
-
-    @Test
-    @DisplayName("클레인 추출 - 존재하지 않는 클레임 추출")
-    void getClaimValue_exception1() {
-        assertThrows(UnauthorizedException.class, () -> jwtUtil.getClaimValue(token, "nickname"));
-    }
-
-    @Test
-    @DisplayName("클레임 추출 - 클레임 이름이 null일 경우")
-    void getClaimValue_exception2() {
-        assertThrows(UnauthorizedException.class, () -> jwtUtil.getClaimValue(token, null));
-    }
-
-    @Test
-    @DisplayName("클레임 추출 - 토큰이 null인 경우")
-    void getClaimValue_exception3() {
-        assertThrows(UnauthorizedException.class, () -> jwtUtil.getClaimValue(null, "role"));
-    }
 }
