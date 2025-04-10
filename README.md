@@ -1,5 +1,4 @@
 # spring-cloud-gateway
-# Gateway JWT 인증 처리 방식
 
 ## JWT 인증 흐름
 
