@@ -1,12 +1,7 @@
 package com.nhnacademy.gateway.common.util;
 
 import com.nhnacademy.gateway.common.exception.UnauthorizedException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -17,11 +12,23 @@ import java.security.Key;
 import java.util.Objects;
 
 /**
- * JWT 토큰의 유효성 검증 및 클레임 정보 추출을 담당하는 유틸리티 클래스입니다.
- * 다음과 같은 기능을 제공합니다:
- * - 토큰의 유효성 검사
- * - 사용자 ID(subject) 추출
- * - 커스텀 클레임 추출
+ * <h2>JwtUtil</h2>
+ * <p>
+ * JWT 토큰의 유효성 검증 및 사용자 정보 추출을 담당하는 유틸리티 클래스입니다.
+ * </p>
+ *
+ * <h3>주요 기능</h3>
+ * <ul>
+ *     <li>JWT 서명 검증 및 구조 유효성 검사</li>
+ *     <li>사용자 ID(subject) 추출</li>
+ *     <li>커스텀 클레임 값 추출</li>
+ * </ul>
+ *
+ * <p>
+ * JWT 관련 예외가 발생한 경우 {@link UnauthorizedException}을 통해 처리합니다.
+ * </p>
+ *
+ * @author HwangSlater
  */
 @Slf4j
 @Component
@@ -47,7 +54,7 @@ public class JwtUtil {
     }
 
     /**
-     * 주어진 JWT 토큰의 서명과 구조의 유효성을 검증합니다.
+     * 주어진 JWT 토큰의 서명, 구조, 만료 여부를 검증합니다.
      *
      * @param token 검증할 JWT 토큰 문자열
      * @return 유효한 토큰이면 true, 그렇지 않으면 false
@@ -99,7 +106,7 @@ public class JwtUtil {
      *
      * @param token     JWT 토큰 문자열
      * @param claimName 추출할 클레임 이름 (예: "role", "email", "nickname")
-     * @return 해당 클레임 값
+     * @return 해당 클레임의 값
      * @throws UnauthorizedException 클레임 추출에 실패한 경우
      */
     public String getClaimValue(String token, String claimName) {

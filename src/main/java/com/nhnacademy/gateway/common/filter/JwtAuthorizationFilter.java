@@ -1,5 +1,6 @@
 package com.nhnacademy.gateway.common.filter;
 
+import com.nhnacademy.gateway.common.exception.ForbiddenException;
 import com.nhnacademy.gateway.common.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,30 +31,37 @@ import java.util.Objects;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter implements GatewayFilter {
+    enum USER_ROLE {
+        USER,
+        ADMIN,
+        GUEST
+    }
 
+    private static final String CLAIM_USER_NAME = "userId";
+    private static final String CLAIM_USER_ROLE = "userRole";
     private final JwtUtil jwtUtil;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         List<HttpCookie> cookies = exchange.getRequest().getCookies().get("access_token");
-        String userId = "guest";
-        String userRole = "guest";
+        String userId = USER_ROLE.GUEST.name();
+        String userRole = USER_ROLE.GUEST.name();
 
         if (Objects.nonNull(cookies) && !cookies.isEmpty()) {
             String token = cookies.getFirst().getValue();
             if (jwtUtil.isValidToken(token)) {
-                userId = jwtUtil.getClaimValue(token, "userId");
-                userRole = jwtUtil.getClaimValue(token, "userRole");
+                userId = jwtUtil.getClaimValue(token, CLAIM_USER_NAME);
+                userRole = jwtUtil.getClaimValue(token, CLAIM_USER_ROLE);
             }
         }
 
-        if (!userRole.equals("admin")) {
-            throw new RuntimeException();
+        if (!USER_ROLE.ADMIN.name().equals(userRole)) {
+            throw new ForbiddenException("관리자 권한이 필요합니다.");
         }
 
         Map<String, Object> attribute = exchange.getAttributes();
-        attribute.put("userId", userId);
-        attribute.put("userRole", userRole);
+        attribute.put(CLAIM_USER_NAME, userId);
+        attribute.put(CLAIM_USER_ROLE, userRole);
 
         return chain.filter(exchange);
     }
