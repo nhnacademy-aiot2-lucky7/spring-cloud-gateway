@@ -22,8 +22,6 @@ public class RouterConfig {
                                 .path("/admin/**")
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://SPRING-WEB-API")
-                                // 실패했을 경우, 로그인 페이지로 유도하는 리디렉션 이벤트를 추가 예정
-
                 )
                 .build();
     }
