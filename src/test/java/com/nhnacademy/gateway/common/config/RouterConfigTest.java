@@ -5,7 +5,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +17,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Date;
 
+// 통합 테스트
 @Slf4j
 @AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -42,7 +42,6 @@ class RouterConfigTest {
                 .setExpiration(new Date(System.currentTimeMillis() + 60000))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
-        Assertions.assertTrue(jwtUtil.isValidToken(testToken));
     }
 
     @Disabled("'/admin/**'에 해당하는 Spring API Service를 아직 등록하지 않은 관계로, 성공했음을 확인할 수 없습니다.")

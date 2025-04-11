@@ -66,10 +66,13 @@ public class JwtUtil {
 
         } catch (ExpiredJwtException e) {
             throw new UnauthorizedException("JWT가 만료되었습니다.");
-        } catch (UnsupportedJwtException | MalformedJwtException e) {
-            throw new UnauthorizedException("지원하지 않거나 형식이 잘못된 JWT입니다.");
-        } catch (IllegalArgumentException e) {
-            throw new UnauthorizedException("JWT 토큰이 비어 있거나 유효하지 않습니다.");
+        } catch (JwtException | IllegalArgumentException e) {
+            String message = e.getMessage();
+            throw new UnauthorizedException(
+                    (message != null && !message.isEmpty())
+                            ? message
+                            : "유효하지 않은 JWT입니다."
+            );
         }
     }
 
@@ -85,7 +88,13 @@ public class JwtUtil {
     public String getUserId(String token) {
         try {
             isValidJwtToken(token);
-            return getClaims(token).getSubject();
+            String subject = getClaims(token).getSubject();
+
+            if (subject == null) {
+                throw new JwtException("JWT에서 사용자 ID 추출 실패");
+            }
+
+            return subject;
         } catch (JwtException | IllegalArgumentException e) {
             String message = e.getMessage();
             throw new UnauthorizedException(
