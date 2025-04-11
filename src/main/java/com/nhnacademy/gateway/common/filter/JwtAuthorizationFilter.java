@@ -55,19 +55,18 @@ public class JwtAuthorizationFilter implements GatewayFilter {
         if (Objects.nonNull(cookies) && !cookies.isEmpty()) {
             String token = cookies.getFirst().getValue();
 
-            // 토큰이 유효하면
-            if (jwtUtil.isValidToken(token)) {
-                // userId 클레임 추출
-                String userId = jwtUtil.getUserId(token);
+            // 토큰이 변조 또는 잘못 되었을 경우 throw를 던지는 validate실행
+            jwtUtil.validateToken(token);
+            // userId 클레임 추출
+            String userId = jwtUtil.getUserId(token);
 
-                // 커스텀 헤더에 userId 담아서 요청 객체 수정
-                ServerWebExchange mutatedExchange = exchange.mutate()
-                        .request(builder -> builder.header("X-User-Id", userId))
-                        .build();
+            // 커스텀 헤더에 userId 담아서 요청 객체 수정
+            ServerWebExchange mutatedExchange = exchange.mutate()
+                    .request(builder -> builder.header("X-User-Id", userId))
+                    .build();
 
-                // 수정된 요청 전달
-                return chain.filter(mutatedExchange);
-            }
+            // 수정된 요청 전달
+            return chain.filter(mutatedExchange);
         }
 
         // 토큰이 없거나 유효하지 않으면 원본 요청 그대로 전달

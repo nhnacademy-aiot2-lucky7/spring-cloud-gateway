@@ -47,6 +47,7 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
      */
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
+        log.debug(ex.getMessage());
         ServerHttpResponse response = exchange.getResponse();
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
