@@ -1,51 +1,68 @@
 package com.nhnacademy.gateway.common.config;
 
+import com.nhnacademy.gateway.common.util.JwtUtil;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.gateway.route.RouteLocator;
-import org.springframework.test.context.ActiveProfiles;
-import reactor.test.StepVerifier;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Date;
 
 @Slf4j
-@ActiveProfiles("test")
-@SpringBootTest //(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@AutoConfigureWebTestClient
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class RouterConfigTest {
 
     @Autowired
-    private RouteLocator routeLocator;
+    private WebTestClient webTestClient;
 
-    @DisplayName("Routes: 조회")
-    @Test
-    void testRoutes() {
-        AtomicInteger index = new AtomicInteger();
+    @Autowired
+    private JwtUtil jwtUtil;
 
-        log.debug("============================================================");
-        routeLocator
-                .getRoutes()
-                .subscribe(route ->
-                        log.debug("Registered Route: {}", route.getId())
-                );
-        log.debug("");
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    private String testToken;
+
+    @BeforeEach
+    void setUp() {
+        testToken = Jwts.builder()
+                .setSubject("testUser")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 60000))
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
+                .compact();
+        Assertions.assertTrue(jwtUtil.isValidToken(testToken));
     }
 
-    /*@DisplayName("Routes: ")
+    @Disabled("'/admin/**'에 해당하는 Spring API Service를 아직 등록하지 않은 관계로, 성공했음을 확인할 수 없습니다.")
+    @DisplayName("'/admin/**' 요청 성공: access_token 존재")
     @Test
-    void testCustomRouteLocator() {
-        StepVerifier
-                .create(routeLocator.getRoutes().collectList())
-                .expectNextMatches(routes ->
-                        routes
-                                .stream()
-                                .anyMatch(route -> {
-                                    log.debug("Route ID: {}", route.getId());
-                                    return route.getId().equals("spring-web-api");
-                                })
-                )
-                .verifyComplete();
-    }*/
+    void testRoutePathAdmin() {
+        webTestClient.get()
+                .uri("/admin/test")
+                .cookie("access_token", testToken)
+                .exchange()
+                .expectHeader().exists("X-User-Id")
+                .expectHeader().valueEquals("X-User-Id", "testUser");
+    }
+
+    @DisplayName("'/admin/**' 요청 실패: access_token 부재")
+    @Test
+    void testRoutePathAdmin_WhenNotAccessTokenIsMissing() {
+        webTestClient.get()
+                .uri("/admin/test")
+                .exchange()
+                .expectStatus().is5xxServerError(); // RuntimeException 발생 기준
+    }
 }
