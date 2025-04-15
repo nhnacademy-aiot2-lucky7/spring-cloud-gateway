@@ -10,6 +10,9 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 import java.util.List;
 
+/**
+ * CORS 정책을 설정하는 Config 영역입니다.
+ */
 @Configuration
 public class CorsConfig implements WebFluxConfigurer {
 
@@ -19,7 +22,7 @@ public class CorsConfig implements WebFluxConfigurer {
     }
 
     /**
-     * 구성을 반환합니다.
+     * 특정 출처(origin)에서 오는 해당하는 HTTP Method 요청만 허용하도록 설정된 CORS 정책을 반환합니다.
      */
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();

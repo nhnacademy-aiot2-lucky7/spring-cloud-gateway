@@ -11,6 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class RouterConfig {
 
+    /**
+     * JWT 인증 필터
+     */
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
 
     @Bean

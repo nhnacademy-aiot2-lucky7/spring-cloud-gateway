@@ -5,14 +5,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.web.reactive.server.HeaderAssertions;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.cors.reactive.CorsWebFilter;
 
 import java.lang.reflect.Field;
 import java.security.Key;
@@ -22,9 +22,6 @@ import java.util.Date;
 @SpringBootTest
 @AutoConfigureWebTestClient
 class CorsConfigTest {
-
-    @Autowired
-    private CorsWebFilter corsFilter;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -51,46 +48,39 @@ class CorsConfigTest {
     }
 
     @Test
-    void test() {
-        HeaderAssertions header =
-                webTestClient.get()
-                        .uri("/admin/test")
-                        .header(HttpHeaders.ORIGIN, "https://luckyseven.live")
-                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
-                        .cookie("access_token", validToken)
-                        .exchange()
-                        .expectHeader();
-
-        // log.debug("Origin: {}", header.exists(HttpHeaders.ORIGIN));
-        // log.debug("Access-Control-Allow-Origin: {}", header.exists(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-
-                /*.exchange()
-                .expectHeader().valueEquals(
-                        "Access-Control-Allow-Origin",
-                        "https://luckyseven.live"
-                )
-                .expectHeader().exists("Access-Control-Allow-Methods");*/
-    }
-
-    /*@Test
+    @DisplayName("CORS Preflight 요청에 대해 허용된 origin과 method가 허용되는지 검증")
     void shouldAllowCors_whenOriginIsAllowed() {
-        // Given
-        MockServerHttpRequest request = MockServerHttpRequest
-                .options("/admin/method-get")
+        webTestClient.options()
+                .uri("/admin/test")
                 .header(HttpHeaders.ORIGIN, "https://luckyseven.live")
                 .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
-                .build();
+                .cookie("access_token", validToken)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)
+                .expectHeader().valueEquals(
+                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+                        "https://luckyseven.live"
+                )
+                .expectHeader().exists(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD)
+                .expectHeader().valueEquals(
+                        HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD,
+                        HttpMethod.GET.name()
+                );
+    }
 
-        MockServerWebExchange exchange = MockServerWebExchange.from(request);
-
-        // When
-        corsFilter.filter(exchange, serverWebExchange -> Mono.empty()).block();
-
-        // Then
-        HttpHeaders responseHeaders = exchange.getResponse().getHeaders();
-
-        assertEquals("https://luckyseven.live", responseHeaders.getAccessControlAllowOrigin());
-        assertTrue(responseHeaders.getAccessControlAllowMethods().contains(HttpMethod.GET));
-    }*/
-
+    @Test
+    @DisplayName("실제 GET 요청 시 CORS 헤더가 응답에 포함되는지 확인")
+    void shouldIncludeCorsHeadersOnActualRequest_whenOriginIsAllowed() {
+        webTestClient.get()
+                .uri("/admin/test")
+                .header(HttpHeaders.ORIGIN, "https://luckyseven.live")
+                .cookie("access_token", validToken)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals(
+                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+                        "https://luckyseven.live"
+                );
+    }
 }
