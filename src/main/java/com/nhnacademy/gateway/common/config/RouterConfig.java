@@ -17,11 +17,24 @@ public class RouterConfig {
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route(
-                        "spring-web-api",
+                        "user-member-service",
                         r -> r
-                                .path("/admin/**")
+                                .path("/users/**")
+                                // .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://USER-SERVICE")
+                )
+                .route(
+                        "user-admin-service",
+                        r -> r
+                                .path("/admin/users/**")
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
-                                .uri("lb://SPRING-WEB-API")
+                                .uri("lb://USER-SERVICE")
+                )
+                .route(
+                        "auth-service",
+                        r -> r
+                                .path("/auths/**")
+                                .uri("lb://AUTHSERVICE2")
                 )
                 .build();
     }
