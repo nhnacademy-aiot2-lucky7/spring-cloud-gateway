@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class CommonHttpException extends RuntimeException {
+
     private final int statusCode;
 
     public CommonHttpException(final int statusCode, final String message) {
@@ -15,5 +16,4 @@ public class CommonHttpException extends RuntimeException {
         super(message, cause);
         this.statusCode = statusCode;
     }
-
 }
