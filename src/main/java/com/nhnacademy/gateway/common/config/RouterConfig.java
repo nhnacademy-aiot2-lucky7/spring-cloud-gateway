@@ -34,7 +34,7 @@ public class RouterConfig {
                         "auth-service",
                         r -> r
                                 .path("/auths/**")
-                                .uri("lb://AUTHSERVICE2")
+                                .uri("lb://AUTH-SERVICE")
                 )
                 .build();
     }
