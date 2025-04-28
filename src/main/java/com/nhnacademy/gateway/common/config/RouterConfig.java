@@ -33,7 +33,7 @@ public class RouterConfig {
                 .route(
                         "auth-service",
                         r -> r
-                                .path("/auths/**")
+                                .path("/auth/**")
                                 .uri("lb://AUTH-SERVICE")
                 )
                 .build();
