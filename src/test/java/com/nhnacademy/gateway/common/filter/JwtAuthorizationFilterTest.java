@@ -26,7 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-class JwtAuthorizationFilterIntegrationTest {
+class JwtAuthorizationFilterTest {
 
     @Autowired
     private JwtAuthorizationFilter jwtAuthorizationFilter;
@@ -163,7 +163,7 @@ class JwtAuthorizationFilterIntegrationTest {
         MockServerWebExchange exchange = MockServerWebExchange.from(request);
         GatewayFilterChain chain = mock(GatewayFilterChain.class);
         when(chain.filter(any())).thenReturn(Mono.empty());
-
+        
         UnauthorizedException exception = assertThrows(UnauthorizedException.class,
                 () -> jwtAuthorizationFilter.filter(exchange, chain).block());
 

@@ -34,13 +34,17 @@ public class CorsConfig implements WebFluxConfigurer {
                 )
         );
 
+        corsConfig.setAllowedHeaders(List.of("Content-Type", "X-USER-ID"));
+        corsConfig.setAllowCredentials(true);
+
         // 요청으로 허용하는 HTTP Methods를 설정하십시오.
         corsConfig.setAllowedMethods(
                 List.of(
                         HttpMethod.GET.name(),
                         HttpMethod.POST.name(),
                         HttpMethod.PUT.name(),
-                        HttpMethod.DELETE.name()
+                        HttpMethod.DELETE.name(),
+                        HttpMethod.OPTIONS.name()
                 )
         );
 

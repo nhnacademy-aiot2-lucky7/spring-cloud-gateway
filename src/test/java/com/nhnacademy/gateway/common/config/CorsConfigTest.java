@@ -1,86 +1,57 @@
 package com.nhnacademy.gateway.common.config;
 
-import com.nhnacademy.gateway.common.util.JwtUtil;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
+import org.mockito.Mockito;
 import org.springframework.http.HttpMethod;
-import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.http.server.RequestPath;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.server.ServerWebExchange;
 
-import java.lang.reflect.Field;
-import java.security.Key;
-import java.util.Date;
+import java.net.URI;
 
-@Slf4j
-@SpringBootTest
-@AutoConfigureWebTestClient
-class CorsConfigTest {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
-    @Autowired
-    private WebTestClient webTestClient;
+public class CorsConfigTest {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    CorsConfig corsConfig = new CorsConfig();
 
-    private String validToken;
-
-    @BeforeEach
-    void setUp() throws Exception {
-        Field secretKeyField = JwtUtil.class.getDeclaredField("secretKey");
-        secretKeyField.setAccessible(true);
-        Key secretKey = (Key) secretKeyField.get(jwtUtil);
-
-        Date now = new Date();
-        validToken =
-                Jwts.builder()
-                        .setSubject("testUser")
-                        .setIssuedAt(now)
-                        .setExpiration(new Date(now.getTime() + (long) 60000))
-                        .signWith(secretKey, SignatureAlgorithm.HS256)
-                        .compact();
+    @Test
+    @DisplayName("CorsWebFilter 빈이 정상 생성되는지 확인")
+    void corsFilterBean_isCreated() {
+        assertThat(corsConfig.corsFilter()).isNotNull();
     }
 
     @Test
-    @DisplayName("CORS Preflight 요청에 대해 허용된 origin과 method가 허용되는지 검증")
-    void shouldAllowCors_whenOriginIsAllowed() {
-        webTestClient.options()
-                .uri("/admin/test")
-                .header(HttpHeaders.ORIGIN, "https://luckyseven.live")
-                .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
-                .cookie("access_token", validToken)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)
-                .expectHeader().valueEquals(
-                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
-                        "https://luckyseven.live"
-                )
-                .expectHeader().exists(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD)
-                .expectHeader().valueEquals(
-                        HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD,
-                        HttpMethod.GET.name()
-                );
-    }
+    @DisplayName("CORS 설정에서 허용된 출처, 헤더, 메서드, 자격증명 설정이 올바른지 검증")
+    void corsConfigurationSource_containsExpectedSettings() {
+        UrlBasedCorsConfigurationSource source = corsConfig.corsConfigurationSource();
 
-    @Test
-    @DisplayName("실제 GET 요청 시 CORS 헤더가 응답에 포함되는지 확인")
-    void shouldIncludeCorsHeadersOnActualRequest_whenOriginIsAllowed() {
-        webTestClient.get()
-                .uri("/admin/test")
-                .header(HttpHeaders.ORIGIN, "https://luckyseven.live")
-                .cookie("access_token", validToken)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().valueEquals(
-                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
-                        "https://luckyseven.live"
-                );
+        ServerWebExchange exchange = Mockito.mock(ServerWebExchange.class);
+        ServerHttpRequest request = Mockito.mock(ServerHttpRequest.class);
+        RequestPath requestPath = Mockito.mock(RequestPath.class);
+
+        when(exchange.getRequest()).thenReturn(request);
+        when(request.getURI()).thenReturn(URI.create("https://example.com/test-path"));
+        when(request.getPath()).thenReturn(requestPath);
+        when(requestPath.pathWithinApplication()).thenReturn(requestPath);
+        when(requestPath.value()).thenReturn("/test-path");
+
+        CorsConfiguration config = source.getCorsConfiguration(exchange);
+
+        assertThat(config).isNotNull();
+        assertThat(config.getAllowedOrigins()).containsExactly("https://luckyseven.live");
+        assertThat(config.getAllowedHeaders()).containsExactlyInAnyOrder("Content-Type", "X-USER-ID");
+        assertThat(config.getAllowCredentials()).isTrue();
+        assertThat(config.getAllowedMethods()).containsExactlyInAnyOrder(
+                HttpMethod.GET.name(),
+                HttpMethod.POST.name(),
+                HttpMethod.PUT.name(),
+                HttpMethod.DELETE.name(),
+                HttpMethod.OPTIONS.name()
+        );
     }
 }
