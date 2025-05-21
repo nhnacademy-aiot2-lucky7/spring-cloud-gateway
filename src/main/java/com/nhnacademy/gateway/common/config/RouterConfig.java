@@ -34,6 +34,27 @@ public class RouterConfig {
                                 .uri("lb://USER-SERVICE")
                 )
                 .route(
+                        "USER-SERVICE",
+                        r -> r
+                                .path("/departments/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://USER-SERVICE")
+                )
+                .route(
+                        "USER-SERVICE",
+                        r -> r
+                                .path("/roles/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://USER-SERVICE")
+                )
+                .route(
+                        "USER-SERVICE",
+                        r -> r
+                                .path("/event-levels/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://USER-SERVICE")
+                )
+                .route(
                         "AUTH-SERVICE",
                         r -> r
                                 .path("/auth/**")

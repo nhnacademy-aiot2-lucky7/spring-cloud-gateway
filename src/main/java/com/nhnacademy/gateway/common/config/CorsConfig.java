@@ -28,11 +28,8 @@ public class CorsConfig implements WebFluxConfigurer {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
         // cross-origin 요청이 허용되는 출처를 설정하십시오.
-        corsConfig.setAllowedOrigins(
-                List.of(
-                        "https://luckyseven.live"
-                )
-        );
+        corsConfig.setAllowedOriginPatterns(List.of("http://localhost:8080", "https://luckyseven.live"));
+
 
         corsConfig.setAllowedHeaders(List.of("Content-Type", "X-USER-ID"));
         corsConfig.setAllowCredentials(true);
