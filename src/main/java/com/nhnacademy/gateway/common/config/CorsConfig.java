@@ -2,6 +2,7 @@ package com.nhnacademy.gateway.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
@@ -28,11 +29,12 @@ public class CorsConfig implements WebFluxConfigurer {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
         // cross-origin 요청이 허용되는 출처를 설정하십시오.
-        corsConfig.setAllowedOriginPatterns(List.of("http://localhost:8080", "https://luckyseven.live"));
-
-
-        corsConfig.setAllowedHeaders(List.of("Content-Type", "X-USER-ID"));
-        corsConfig.setAllowCredentials(true);
+        corsConfig.setAllowedOriginPatterns(
+                List.of(
+                        "http://localhost:8080",
+                        "https://luckyseven.live"
+                )
+        );
 
         // 요청으로 허용하는 HTTP Methods를 설정하십시오.
         corsConfig.setAllowedMethods(
@@ -44,6 +46,16 @@ public class CorsConfig implements WebFluxConfigurer {
                         HttpMethod.OPTIONS.name()
                 )
         );
+
+        // 요청으로 허용하는 HTTP Header를 설정하십시오.
+        corsConfig.setAllowedHeaders(
+                List.of(
+                        HttpHeaders.CONTENT_TYPE,
+                        HttpHeaders.AUTHORIZATION,
+                        "X-USER-ID"
+                )
+        );
+        corsConfig.setAllowCredentials(true);
 
         // 커스텀한 설정 값을 path에 매핑
         UrlBasedCorsConfigurationSource source =
