@@ -53,6 +53,13 @@ public class RouterConfig {
                                 .path("/auth/**")
                                 .uri("lb://AUTH-SERVICE")
                 )
+                .route(
+                        "EVENT-SERVICE",
+                        r -> r
+                                .path("/events/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://EVENT-SERVICE")
+                )
                 .build();
     }
 }
