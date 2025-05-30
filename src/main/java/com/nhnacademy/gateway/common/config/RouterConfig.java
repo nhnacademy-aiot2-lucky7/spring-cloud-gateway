@@ -22,6 +22,13 @@ public class RouterConfig {
                 .route(
                         "USER-SERVICE",
                         r -> r
+                                .path("/admin/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://USER-SERVICE")
+                )
+                .route(
+                        "USER-SERVICE",
+                        r -> r
                                 .path("/users/**")
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://USER-SERVICE")
