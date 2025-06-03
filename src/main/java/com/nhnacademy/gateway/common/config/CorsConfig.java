@@ -28,7 +28,7 @@ public class CorsConfig implements WebFluxConfigurer {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
         // cross-origin 요청이 허용되는 출처를 설정하십시오.
-        corsConfig.setAllowedOriginPatterns(List.of("**"));
+        corsConfig.setAllowedOriginPatterns(List.of("*"));
 
 
         corsConfig.setAllowedHeaders(List.of("Content-Type", "X-USER-ID", "Authorization"));
