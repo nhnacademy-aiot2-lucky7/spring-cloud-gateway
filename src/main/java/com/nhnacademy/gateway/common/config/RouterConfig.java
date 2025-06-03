@@ -36,6 +36,13 @@ public class RouterConfig {
                 .route(
                         "USER-SERVICE",
                         r -> r
+                                .path("/images/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://USER-SERVICE")
+                )
+                .route(
+                        "USER-SERVICE",
+                        r -> r
                                 .path("/departments/**")
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://USER-SERVICE")
