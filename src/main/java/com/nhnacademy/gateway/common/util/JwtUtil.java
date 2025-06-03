@@ -1,7 +1,10 @@
 package com.nhnacademy.gateway.common.util;
 
 import com.nhnacademy.gateway.common.exception.UnauthorizedException;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -32,11 +35,15 @@ import java.util.Objects;
 @Component
 public class JwtUtil {
 
-    /** application.properties에서 주입받은 JWT 서명용 시크릿 키 */
+    /**
+     * application.properties에서 주입받은 JWT 서명용 시크릿 키
+     */
     @Value("${jwt.secret}")
     private String secret;
 
-    /** JWT 서명 및 검증에 사용하는 HMAC 키 객체 */
+    /**
+     * JWT 서명 및 검증에 사용하는 HMAC 키 객체
+     */
     private Key secretKey;
 
     /**
@@ -88,7 +95,7 @@ public class JwtUtil {
     public String getUserId(String token) {
         try {
             isValidJwtToken(token);
-            String subject = getClaims(token).getSubject();
+            String subject = getClaims(token).get("user_id", String.class);
 
             if (subject == null) {
                 throw new JwtException("JWT에서 사용자 ID 추출 실패");

@@ -49,7 +49,7 @@ public class JwtAuthorizationFilter implements GatewayFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // access_token 쿠키 조회
-        List<HttpCookie> cookies = exchange.getRequest().getCookies().get("access_token");
+        List<HttpCookie> cookies = exchange.getRequest().getCookies().get("accessToken");
         if (Objects.isNull(cookies) || cookies.isEmpty()) {
             // 토큰이 없으면, 원본 요청을 그대로 전달
             return chain.filter(exchange);
