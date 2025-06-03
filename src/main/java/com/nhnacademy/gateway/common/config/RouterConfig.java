@@ -36,6 +36,13 @@ public class RouterConfig {
                 .route(
                         "USER-SERVICE",
                         r -> r
+                                .path("/images/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://USER-SERVICE")
+                )
+                .route(
+                        "USER-SERVICE",
+                        r -> r
                                 .path("/departments/**")
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://USER-SERVICE")
@@ -66,6 +73,13 @@ public class RouterConfig {
                                 .path("/events/**")
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://EVENT-SERVICE")
+                )
+                .route(
+                        "SERVER-RESOURCE-SERVICE",
+                        r -> r
+                                .path("/profile-image/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://SERVER-RESOURCE-SERVICE")
                 )
                 .build();
     }
