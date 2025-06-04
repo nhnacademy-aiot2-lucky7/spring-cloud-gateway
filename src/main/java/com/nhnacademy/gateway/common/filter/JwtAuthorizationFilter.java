@@ -64,7 +64,7 @@ public class JwtAuthorizationFilter implements GatewayFilter {
 
         // 커스텀 헤더에 userId 담아서 요청 객체 수정
         ServerWebExchange mutatedExchange = exchange.mutate()
-                .request(builder -> builder.header("X-User-Id", userId))
+                .request(builder -> builder.header("X-USER-ID", userId))
                 .build();
 
         // 수정된 요청 전달
