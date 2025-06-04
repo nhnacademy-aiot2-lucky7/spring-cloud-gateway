@@ -65,7 +65,7 @@ public class RouterConfig {
                         "AUTH-SERVICE",
                         r -> r
                                 .path("/auth/**")
-                                .uri("lb://AUTH-SERVICE")
+                                .uri("lb://auth-service")
                 )
                 .route(
                         "EVENT-SERVICE",
