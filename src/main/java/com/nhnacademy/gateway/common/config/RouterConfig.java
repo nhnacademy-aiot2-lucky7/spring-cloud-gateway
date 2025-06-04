@@ -17,47 +17,23 @@ public class RouterConfig {
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
 
     @Bean
-    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
+    RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route(
-                        "USER-SERVICE",
+                .route("SENSOR-SERVICE",
                         r -> r
-                                .path("/admin/**")
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
-                                .uri("lb://USER-SERVICE")
+                                .path("/sensor-data-mappings/**")
+                                .uri("lb://SENSOR-SERVICE")
                 )
                 .route(
                         "USER-SERVICE",
                         r -> r
-                                .path("/users/**")
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
-                                .uri("lb://USER-SERVICE")
-                )
-                .route(
-                        "USER-SERVICE",
-                        r -> r
-                                .path("/images/**")
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
-                                .uri("lb://USER-SERVICE")
-                )
-                .route(
-                        "USER-SERVICE",
-                        r -> r
-                                .path("/departments/**")
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
-                                .uri("lb://USER-SERVICE")
-                )
-                .route(
-                        "USER-SERVICE",
-                        r -> r
-                                .path("/roles/**")
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
-                                .uri("lb://USER-SERVICE")
-                )
-                .route(
-                        "USER-SERVICE",
-                        r -> r
-                                .path("/event-levels/**")
+                                .path(
+                                        "/admin/**",
+                                        "/departments/**",
+                                        "/users/**",
+                                        "/roles/**",
+                                        "/event-levels/**"
+                                )
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://USER-SERVICE")
                 )
@@ -70,7 +46,10 @@ public class RouterConfig {
                 .route(
                         "EVENT-SERVICE",
                         r -> r
-                                .path("/events/**")
+                                .path(
+                                        "/events/**",
+                                        "/notifications/**"
+                                )
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://EVENT-SERVICE")
                 )
@@ -80,6 +59,20 @@ public class RouterConfig {
                                 .path("/profile-image/**")
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://SERVER-RESOURCE-SERVICE")
+                )
+                .route(
+                        "GATEWAY-SERVICE",
+                        r -> r
+                                .path("/gateways/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://GATEWAY-SERVICE")
+                )
+                .route(
+                        "SENSOR-SERVICE",
+                        r -> r
+                                .path("/sensors/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://SENSOR-SERVICE")
                 )
                 .build();
     }
