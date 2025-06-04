@@ -74,6 +74,16 @@ public class RouterConfig {
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://SENSOR-SERVICE")
                 )
+                .route(
+                        "AI-ANALYSIS-RESULT-SERVICE",
+                        r -> r
+                                .path(
+                                        "/analysis-results/**",
+                                        "/admin/**"
+                                )
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://AI-ANALYSIS-RESULT-SERVICE")
+                )
                 .build();
     }
 }
