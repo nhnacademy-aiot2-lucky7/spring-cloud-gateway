@@ -14,7 +14,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 import java.util.List;
 
 /**
- * CORS 정책을 설정하는 Config 클래스입니다.
+ * CORS 정책을 설정하는 Config 클래스입니다. <br>
  * 해당 설정은 Spring Cloud Gateway의 전역 CORS 필터로 작동합니다.
  */
 @Slf4j
