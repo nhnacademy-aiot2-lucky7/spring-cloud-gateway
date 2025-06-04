@@ -17,40 +17,23 @@ public class RouterConfig {
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
 
     @Bean
-    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
+    RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route(
-                        "USER-SERVICE",
+                .route("SENSOR-SERVICE",
                         r -> r
-                                .path("/admin/**")
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
-                                .uri("lb://USER-SERVICE")
+                                .path("/sensor-data-mappings/**")
+                                .uri("lb://SENSOR-SERVICE")
                 )
                 .route(
                         "USER-SERVICE",
                         r -> r
-                                .path("/users/**")
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
-                                .uri("lb://USER-SERVICE")
-                )
-                .route(
-                        "USER-SERVICE",
-                        r -> r
-                                .path("/departments/**")
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
-                                .uri("lb://USER-SERVICE")
-                )
-                .route(
-                        "USER-SERVICE",
-                        r -> r
-                                .path("/roles/**")
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
-                                .uri("lb://USER-SERVICE")
-                )
-                .route(
-                        "USER-SERVICE",
-                        r -> r
-                                .path("/event-levels/**")
+                                .path(
+                                        "/admin/**",
+                                        "/departments/**",
+                                        "/users/**",
+                                        "/roles/**",
+                                        "/event-levels/**"
+                                )
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://USER-SERVICE")
                 )
