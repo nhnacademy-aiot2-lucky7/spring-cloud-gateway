@@ -40,7 +40,7 @@ public class RouterConfig {
                         "USER-SERVICE",
                         r -> r
                                 .path(
-                                        "/admin/**",
+                                        "/admin/users/**",
                                         "/users/**"
                                 )
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
@@ -72,8 +72,8 @@ public class RouterConfig {
                 .route(
                         "GATEWAY-SERVICE",
                         r -> r
-                                .path("/gateways/**")
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .path("/api/gateways/**")
+                                .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
                                 .uri("lb://GATEWAY-SERVICE")
                 )
                 .route(
