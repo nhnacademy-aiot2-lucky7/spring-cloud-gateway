@@ -29,23 +29,22 @@ public class RouterConfig {
                         "USER-SERVICE",
                         r -> r
                                 .path(
-                                        "/departments"
+                                        "/roles/**",
+                                        "/event-levels/**",
+                                        "/departments/**"
                                 )
                                 .uri("lb://USER-SERVICE")
                 )
-//                .route(
-//                        "USER-SERVICE",
-//                        r -> r
-//                                .path(
-//                                        "/admin/**",
-//                                        "/departments/**",
-//                                        "/users/**",
-//                                        "/roles/**",
-//                                        "/event-levels/**"
-//                                )
-//                                .filters(f -> f.filter(jwtAuthorizationFilter))
-//                                .uri("lb://USER-SERVICE")
-//                )
+                .route(
+                        "USER-SERVICE",
+                        r -> r
+                                .path(
+                                        "/admin/**",
+                                        "/users/**"
+                                )
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://USER-SERVICE")
+                )
                 .route(
                         "AUTH-SERVICE",
                         r -> r
