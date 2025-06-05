@@ -104,7 +104,8 @@ public class RouterConfig {
                                 .path(
                                         "/api/dashboards/**",
                                         "/api/panels/**",
-                                        "/api/folders/**"
+                                        "/api/folders/**",
+                                        "/api/test/**"
                                 )
                                 .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
                                 .uri("lb://DASHBOARD-SERVICE")
