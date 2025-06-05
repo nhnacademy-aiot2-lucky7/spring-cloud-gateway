@@ -102,9 +102,9 @@ public class RouterConfig {
                         "DASHBOARD-SERVICE",
                         r -> r
                                 .path(
-                                        "/dashboards/**",
-                                        "/panels/**",
-                                        "/folders/**"
+                                        "/api/dashboards/**",
+                                        "/api/panels/**",
+                                        "/api/folders/**"
                                 )
                                 .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
                                 .uri("lb://DASHBOARD-SERVICE")
