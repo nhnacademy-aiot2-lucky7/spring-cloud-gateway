@@ -38,6 +38,13 @@ public class RouterConfig {
                                 .uri("lb://USER-SERVICE")
                 )
                 .route(
+                        "DASHBOARD-SERVICE",
+                        r -> r
+                                .path("/api/folders/**", "/api/dashboards/**", "/api/panels/**")
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://DASHBOARD-SERVICE")
+                )
+                .route(
                         "AUTH-SERVICE",
                         r -> r
                                 .path("/auth/**")
