@@ -29,6 +29,14 @@ public class RouterConfig {
                         "USER-SERVICE",
                         r -> r
                                 .path(
+                                        "/departments"
+                                )
+                                .uri("lb://USER-SERVICE")
+                )
+                .route(
+                        "USER-SERVICE",
+                        r -> r
+                                .path(
                                         "/admin/**",
                                         "/departments/**",
                                         "/users/**",
