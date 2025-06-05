@@ -84,6 +84,17 @@ public class RouterConfig {
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://AI-ANALYSIS-RESULT-SERVICE")
                 )
+                .route(
+                        "DASHBOARD-SERVICE",
+                        r -> r
+                                .path(
+                                        "/dashboards",
+                                        "/panels",
+                                        "/folders"
+                                )
+                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .uri("lb://DASHBOARD-SERVICE")
+                )
                 .build();
     }
 }
