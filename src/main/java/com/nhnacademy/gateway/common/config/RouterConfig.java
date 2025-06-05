@@ -16,6 +16,7 @@ public class RouterConfig {
      */
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
 
+
     @Bean
     RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
@@ -70,7 +71,12 @@ public class RouterConfig {
                 .route(
                         "SENSOR-SERVICE",
                         r -> r
-                                .path("/sensors/**")
+                                .path(
+                                        "/sensors/**",
+                                        "/threshold-histories",
+                                        "/sensor-data-mappings",
+                                        "/data-types"
+                                )
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://SENSOR-SERVICE")
                 )
