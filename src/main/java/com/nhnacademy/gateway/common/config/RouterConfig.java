@@ -106,7 +106,7 @@ public class RouterConfig {
                                         "/panels/**",
                                         "/folders/**"
                                 )
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
                                 .uri("lb://DASHBOARD-SERVICE")
                 )
                 .build();
