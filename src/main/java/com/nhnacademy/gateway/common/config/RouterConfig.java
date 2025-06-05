@@ -31,6 +31,7 @@ public class RouterConfig {
                                 .path(
                                         "/roles/**",
                                         "/event-levels/**",
+                                        "/departments",
                                         "/departments/**"
                                 )
                                 .uri("lb://USER-SERVICE")
@@ -92,7 +93,7 @@ public class RouterConfig {
                         r -> r
                                 .path(
                                         "/analysis-results/**",
-                                        "/admin/**"
+                                        "/admin/analysis-results/**"
                                 )
                                 .filters(f -> f.filter(jwtAuthorizationFilter))
                                 .uri("lb://AI-ANALYSIS-RESULT-SERVICE")
