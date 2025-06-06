@@ -72,7 +72,8 @@ public class RouterConfig {
                 .route(
                         "GATEWAY-SERVICE",
                         r -> r
-                                .path("/api/gateways/**")
+                                .path("/api/gateways/**",
+                                        "/department-id/**")
                                 .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
                                 .uri("lb://GATEWAY-SERVICE")
                 )
