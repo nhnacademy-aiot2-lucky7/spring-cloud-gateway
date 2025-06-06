@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -71,17 +72,20 @@ public class JwtUtil {
                     .build()
                     .parseClaimsJws(token);
 
+            log.debug("JWT 유효성 검사 통과: {}", token);
+
         } catch (ExpiredJwtException e) {
+            log.warn("JWT 만료됨. exp: {}, now: {}", e.getClaims().getExpiration(), new Date());
             throw new UnauthorizedException("JWT가 만료되었습니다.");
-        } catch (JwtException | IllegalArgumentException e) {
-            String message = e.getMessage();
-            throw new UnauthorizedException(
-                    (message != null && !message.isEmpty())
-                            ? message
-                            : "유효하지 않은 JWT입니다."
-            );
+        } catch (JwtException e) {
+            log.warn("유효하지 않은 JWT. message: {}, token: {}", e.getMessage(), token, e);
+            throw new UnauthorizedException(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.warn("잘못된 JWT 입력: {}", e.getMessage());
+            throw new UnauthorizedException("잘못된 JWT 입력입니다.");
         }
     }
+
 
     /**
      * JWT에서 사용자 ID(subject)를 추출합니다.
