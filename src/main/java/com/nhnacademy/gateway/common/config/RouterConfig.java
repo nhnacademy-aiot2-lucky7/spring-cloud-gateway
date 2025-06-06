@@ -22,51 +22,54 @@ public class RouterConfig {
         return builder.routes()
                 .route("SENSOR-SERVICE",
                         r -> r
-                                .path("/sensor-data-mappings/**")
+                                .path("/api/sensor-data-mappings/**")
+                                .filters(f->f.stripPrefix(1))
                                 .uri("lb://SENSOR-SERVICE")
                 )
                 .route(
                         "USER-SERVICE",
                         r -> r
                                 .path(
-                                        "/roles/**",
-                                        "/event-levels/**",
-                                        "/departments",
-                                        "/departments/**"
+                                        "/api/roles/**",
+                                        "/api/event-levels/**",
+                                        "/api/departments",
+                                        "/api/departments/**"
                                 )
+                                .filters(f->f.stripPrefix(1))
                                 .uri("lb://USER-SERVICE")
                 )
                 .route(
                         "USER-SERVICE",
                         r -> r
                                 .path(
-                                        "/admin/users/**",
-                                        "/users/**"
+                                        "/api/admin/users/**",
+                                        "/api/users/**"
                                 )
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
                                 .uri("lb://USER-SERVICE")
                 )
                 .route(
                         "AUTH-SERVICE",
                         r -> r
-                                .path("/auth/**")
+                                .path("/api/auth/**")
+                                .filters(f->f.stripPrefix(1))
                                 .uri("lb://AUTH-SERVICE")
                 )
                 .route(
                         "EVENT-SERVICE",
                         r -> r
                                 .path(
-                                        "/events/**",
-                                        "/notifications/**"
+                                        "/api/events/**",
+                                        "/api/notifications/**"
                                 )
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
                                 .uri("lb://EVENT-SERVICE")
                 )
                 .route(
                         "SERVER-RESOURCE-SERVICE",
                         r -> r
-                                .path("/profile-image/**")
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .path("/api/profile-image/**")
+                                .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
                                 .uri("lb://SERVER-RESOURCE-SERVICE")
                 )
                 .route(
@@ -80,22 +83,22 @@ public class RouterConfig {
                         "SENSOR-SERVICE",
                         r -> r
                                 .path(
-                                        "/sensors/**",
-                                        "/threshold-histories",
-                                        "/sensor-data-mappings",
-                                        "/data-types"
+                                        "/api/sensors/**",
+                                        "/api/threshold-histories",
+                                        "/api/sensor-data-mappings",
+                                        "/api/data-types"
                                 )
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
                                 .uri("lb://SENSOR-SERVICE")
                 )
                 .route(
                         "AI-ANALYSIS-RESULT-SERVICE",
                         r -> r
                                 .path(
-                                        "/analysis-results/**",
-                                        "/admin/analysis-results/**"
+                                        "/api/analysis-results/**",
+                                        "/api/admin/analysis-results/**"
                                 )
-                                .filters(f -> f.filter(jwtAuthorizationFilter))
+                                .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
                                 .uri("lb://AI-ANALYSIS-RESULT-SERVICE")
                 )
                 .route(
