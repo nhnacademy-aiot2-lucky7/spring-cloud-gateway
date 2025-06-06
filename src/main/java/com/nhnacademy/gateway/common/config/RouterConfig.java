@@ -33,7 +33,8 @@ public class RouterConfig {
                                         "/api/roles/**",
                                         "/api/event-levels/**",
                                         "/api/departments",
-                                        "/api/departments/**"
+                                        "/api/departments/**",
+                                        "/api/images/**"
                                 )
                                 .filters(f->f.stripPrefix(1))
                                 .uri("lb://USER-SERVICE")
