@@ -115,6 +115,15 @@ public class RouterConfig {
                                 .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
                                 .uri("lb://DASHBOARD-SERVICE")
                 )
+                .route(
+                        "CORRELATION-ANALYSIS-SERVICE",
+                        r -> r
+                                .path(
+                                        "/api/correlation-analyze"
+                                )
+                                .filters(f -> f.stripPrefix(1).filter(jwtAuthorizationFilter))
+                                .uri("lb://CORRELATION-ANALYSIS-SERVICE")
+                )
                 .build();
     }
 }
