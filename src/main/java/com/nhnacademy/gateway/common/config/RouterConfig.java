@@ -103,9 +103,9 @@ public class RouterConfig {
                         r -> r
                                 .path(
                                         "/api/sensors/**",
-                                        "/api/threshold-histories",
-                                        "/api/sensor-data-mappings",
-                                        "/api/data-types"
+                                        "/api/threshold-histories/**",
+                                        "/api/sensor-data-mappings/**",
+                                        "/api/data-types/**"
                                 )
                                 .filters(this::stripAndJwtAuthorizationFilter)
                                 .uri("lb://SENSOR-SERVICE")
@@ -126,7 +126,7 @@ public class RouterConfig {
                         "CORRELATION-ANALYSIS-SERVICE",
                         r -> r
                                 .path(
-                                        "/api/correlation-analyze"
+                                        "/api/correlation-analyze/**"
                                 )
                                 .filters(this::stripAndJwtAuthorizationFilter)
                                 .uri("lb://CORRELATION-ANALYSIS-SERVICE")
