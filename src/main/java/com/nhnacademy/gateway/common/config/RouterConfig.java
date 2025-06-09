@@ -45,7 +45,8 @@ public class RouterConfig {
                                         "/api/event-levels/**",
                                         "/api/departments",
                                         "/api/departments/**",
-                                        "/api/images/**"
+                                        "/api/images/**",
+                                        "/api/main/**"
                                 )
                                 .filters(this::strip)
                                 .uri("lb://USER-SERVICE")
